@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Content resolving and authorization demo</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <script src="jquery/jquery-2.1.1.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <h1>Content resolving and authorization demo</h1>
+    <div>
+        <p>Some ids to try:</p>
+        <p>doms_newspaperCollection:uuid:22dc9795-8dfb-430e-b9ef-645f329e2ecb - a newspaper page</p>
+        <p>doms_newspaperCollection:uuid:000a772b-e060-4add-8e0e-fb47bf90bbf1 - a newspaper edition</p>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Action</th>
+            <th>Input</th>
+            <th>Output</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Content resolve</td>
+            <td><form id="contentresolve" role="form" onsubmit="return false;">
+                <label for="id">id</label> <input class="form-control" type="text" id="id" placeholder="id"/>
+            </form></td>
+            <td><label for="contentresolvearea">Result</label><textarea contenteditable="false" rows="5" class="form-control" id="contentresolvearea"></textarea></td>
+        </tr>
+        <tr>
+            <td>Get ticket</td>
+            <td><form id="ticketcheck" role="form" onsubmit="return false;">
+                <label for="resourceid">id</label> <input class="form-control" type="text" id="resourceid" placeholder="id"/>
+                <label for="type">type</label> <input class="form-control" type="text" id="type" placeholder="type"/>
+                <label for="ip">ip</label> <input class="form-control" type="text" id="ip" placeholder="ip"/>
+                <label for="roles">roles</label> <input class="form-control" type="text" id="roles" placeholder="roles" value="SBIPRoleMapper=inhouse"/>
+                <input type="submit" value="Go"/>
+
+            </form></td>
+            <td><label for="ticketarea">Result</label><textarea contenteditable="false" rows="5" class="form-control" id="ticketarea"></textarea></td>
+        </tr>
+        <tr>
+            <td>Resolve content</td>
+            <td><form id="resolve" role="form" onsubmit="return false;">
+                <label for="url">url</label> <input class="form-control" type="text" id="url" placeholder="url"/>
+                <label for="ticketid">ticketid</label> <input class="form-control" type="text" id="ticketid" placeholder="ticketid"/>
+                <input type="submit" value="Go"/>
+
+                <label for="test">finalurl</label> <input class="form-control" type="text" id="test" placeholder="test"/>
+                <a id="link" href="#">test</a>
+            </form></td>
+            <td><label for="result">Result</label><textarea contenteditable="false" rows="5" class="form-control" id="result"></textarea></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    $.ajax({
+            url: 'http://ipinfo.io',
+            type: 'POST',
+            dataType: 'jsonp',
+            success: function(location) {
+                $("#ip").val(location.ip);
+            }
+        });
+    $("#contentresolve").on("submit", function() {
+                                $.ajax('http://iapetus:9311/content-resolver/content?id='+$("#id").val()).done(
+                                        function(result) {
+                                            $("#contentresolvearea").val(JSON.stringify(result));
+                                            var key = Object.keys(result)[0];
+                                            $("#resourceid").val(key);
+                                            $("#type").val(result[key].resource[0].type);
+                                            $("#url").val(result[key].resource[0].url[0]);
+                                            console.log(result)
+                                        })
+                            }
+    );
+    $("#ticketcheck").on("submit", function() {
+                                $.ajax('http://alhena:7950/ticket-system-service/tickets/issueTicket?id=' + $("#resourceid").val() + '&type=' + $("#type").val() + '&ipAddress=' + $("#ip").val() + '&' + $("#roles").val()).done(
+                                        function(result) {
+                                            $("#ticketarea").val(JSON.stringify(result));
+                                            var key = Object.keys(result)[0];
+                                            $("#ticketid").val(result[key]);
+                                            $("#test").val($("#url").val().replace('[ticketId]', $("#ticketid").val()).replace('%5BticketId%5D',$("#ticketid").val()));
+                                            console.log(result)
+                                        })
+                            }
+    );
+    $("#resolve").on("submit", function() {
+                         var url = $("#url").val().replace('[ticketId]', $("#ticketid").val()).replace('%5BticketId%5D',
+                                                                                                       $("#ticketid").val());
+                         $.ajax(url).done(
+                                        function(result) {
+                                            $("#result").val(new XMLSerializer().serializeToString(result));
+                                            console.log(result)
+                                        })
+                            }
+    );
+
+    $(document).on("change", "#test", function() {
+                      console.log("updating");
+                      var url = $("#test").val();
+                      $("#link").attr("href", url);
+                      $("#link").text(url);
+                  }
+
+    );
+</script>
+</body>
+</html>
+

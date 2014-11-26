@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Content resolving and authorization demo</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <script src="jquery/jquery-2.1.1.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+  </head>
+  <body>
+    <div class="container-fluid">
+    <h1>Content resolving and authorization demo</h1>
+    <table class="table">
+      <thead>
+        <th>Action</th>
+        <th>Input</th>
+        <th>Output</th>
+      </thead>
+      <tbody>
+        <td>Content resolve</td>
+        <td><label for="uuid">uuid</label> <input class="form-control" type="text" id="uuid" placeholder="uuid"></td>
+        <td><label for="contentresolverarea">Result</label><textarea rows="5" class="form-control" id="contentresolvearea"></textarea></td>
+      </tbody>
+    </table>
+    </div>
+    <script type="text/javascript">
+      $("#uuid").on("blur", function() {
+        $.ajax('http://iapetus:9311/content-resolver/content?id='+$("#uuid").val).done(function(result) {$("#contentresolvearea").val(JSON.stringify(result)); console.log(result)});
+      )
+      }
+    </script>
+  </body>
+</html>
+
