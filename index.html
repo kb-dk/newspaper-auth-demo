@@ -13,8 +13,8 @@
     <h1>Content resolving and authorization demo</h1>
     <div>
         <p>Some ids to try:</p>
-        <p>doms_newspaperCollection:uuid:22dc9795-8dfb-430e-b9ef-645f329e2ecb - a newspaper page</p>
-        <p>doms_newspaperCollection:uuid:000a772b-e060-4add-8e0e-fb47bf90bbf1 - a newspaper edition</p>
+        <p>doms_aviser_page:uuid:22dc9795-8dfb-430e-b9ef-645f329e2ecb - a newspaper page</p>
+        <p>doms_aviser_edition:uuid:000a772b-e060-4add-8e0e-fb47bf90bbf1 - a newspaper edition</p>
     </div>
     <table class="table">
         <thead>
@@ -60,6 +60,14 @@
     </table>
 </div>
 <script type="text/javascript">
+    function updatetestlink() {
+        console.log("updating");
+        var url = $("#url").val().replace('[ticketId]', $("#ticketid").val()).replace('%5BticketId%5D',$("#ticketid").val());
+        $("#test").val(url);
+        $("#link").attr("href", url);
+        $("#link").text(url);
+    }
+
     $.ajax({
             url: 'http://ipinfo.io',
             type: 'POST',
@@ -86,7 +94,8 @@
                                             $("#ticketarea").val(JSON.stringify(result));
                                             var key = Object.keys(result)[0];
                                             $("#ticketid").val(result[key]);
-                                            $("#test").val($("#url").val().replace('[ticketId]', $("#ticketid").val()).replace('%5BticketId%5D',$("#ticketid").val()));
+
+                                            updatetestlink();
                                             console.log(result)
                                         })
                             }
@@ -102,14 +111,7 @@
                             }
     );
 
-    $(document).on("change", "#test", function() {
-                      console.log("updating");
-                      var url = $("#test").val();
-                      $("#link").attr("href", url);
-                      $("#link").text(url);
-                  }
-
-    );
+    $(document).on("keyup", "#url", updatetestlink);
 </script>
 </body>
 </html>
